@@ -618,6 +618,23 @@ static bool_t readFromOd(CO_SDOserver_t *SDO,
         if (lock) { CO_LOCK_OD(SDO->CANdevTx); }
         ODR_t odRet = SDO->OD_IO.read(&SDO->OD_IO.stream, bufShifted,
                                       countRdRequest, &countRd);
+#if (C2000_PORT != 0)
+        if((SDO->OD_IO.stream.attribute & ODA_STR) == 0) {
+            uint8_t tempBuff[CO_CONFIG_SDO_SRV_BUFFER_SIZE + 1] = {0};
+            for (int i = 0; i < countRd; i++) {
+                if((i % 2) == 0) {
+                    tempBuff[i] = (((uint16_t *)bufShifted)[i/2]) & 0x00FF;
+                } else {
+                    tempBuff[i] = ((((uint16_t *)bufShifted)[i/2]) >> 8) & 0x00FF;
+                }
+            }
+
+            for (int i = 0; i < countRd; i++) {
+                bufShifted[i] = tempBuff[i];
+            }
+        }
+#endif
+
         if (lock) { CO_UNLOCK_OD(SDO->CANdevTx); }
 
         if (odRet != ODR_OK && odRet != ODR_PARTIAL) {
@@ -876,7 +893,15 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
                     uint32_t size;
                     OD_size_t sizeInOd = SDO->OD_IO.stream.dataLength;
 
+#if (C2000_PORT != 0)
+                    size = 0;
+                    size = SDO->CANrxData[4] & 0x00FF;
+                    size += ((uint32_t)(SDO->CANrxData[5] & 0x00FF)) << 8;
+                    size += ((uint32_t)(SDO->CANrxData[6] & 0x00FF)) << 16;
+                    size += ((uint32_t)(SDO->CANrxData[7] & 0x00FF)) << 24;
+#else
                     memcpy(&size, &SDO->CANrxData[4], sizeof(size));
+#endif
                     SDO->sizeInd = CO_SWAP_32(size);
 
                     /* Indicated size of SDO matches sizeof OD variable? */
@@ -989,7 +1014,15 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
                 uint32_t size;
                 OD_size_t sizeInOd = SDO->OD_IO.stream.dataLength;
 
+#if (C2000_PORT != 0)
+                size = 0;
+                size = SDO->CANrxData[4] & 0x00FF;
+                size += ((uint32_t)(SDO->CANrxData[5] & 0x00FF)) << 8;
+                size += ((uint32_t)(SDO->CANrxData[6] & 0x00FF)) << 16;
+                size += ((uint32_t)(SDO->CANrxData[7] & 0x00FF)) << 24;
+#else
                 memcpy(&size, &SDO->CANrxData[4], sizeof(size));
+#endif
                 SDO->sizeInd = CO_SWAP_32(size);
 
                 /* Indicated size of SDO matches sizeof OD variable? */
@@ -1286,8 +1319,14 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
                     uint32_t sizeInd = SDO->sizeInd;
                     uint32_t sizeIndSw = CO_SWAP_32(sizeInd);
                     SDO->CANtxBuff->data[0] = 0x41;
+#if (C2000_PORT != 0)
+                    for (int i = 0; i < 4; i++) {
+                        SDO->CANtxBuff->data[i + 4] = (uint8_t)((sizeIndSw >> (8 * i)) & 0x00FF);
+                    }
+#else
                     memcpy(&SDO->CANtxBuff->data[4],
                            &sizeIndSw, sizeof(sizeIndSw));
+#endif
                 }
                 else {
                     SDO->CANtxBuff->data[0] = 0x40;
@@ -1499,7 +1538,13 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
             if (SDO->sizeInd > 0) {
                 uint32_t size = CO_SWAP_32(SDO->sizeInd);
                 SDO->CANtxBuff->data[0] |= 0x02;
+#if (C2000_PORT != 0)
+                for(int i = 0; i < 4; i++) {
+                    SDO->CANtxBuff->data[i + 4] = (uint8_t)((size >> (8 * i)) & 0x00FF);
+                }
+#else
                 memcpy(&SDO->CANtxBuff->data[4], &size, sizeof(size));
+#endif
             }
 
             /* reset timeout timer and send message */
@@ -1592,7 +1637,13 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
             SDO->CANtxBuff->data[2] = (uint8_t)(SDO->index >> 8);
             SDO->CANtxBuff->data[3] = SDO->subIndex;
 
+#if (C2000_PORT != 0)
+            for(int i = 0; i < 4; i++) {
+                SDO->CANtxBuff->data[i + 4] = (uint8_t)((code >> (i * 8)) & 0x00FF);
+            }
+#else
             memcpy(&SDO->CANtxBuff->data[4], &code, sizeof(code));
+#endif
             CO_CANsend(SDO->CANdevTx, SDO->CANtxBuff);
             SDO->state = CO_SDO_ST_IDLE;
             ret = CO_SDO_RT_endedWithServerAbort;

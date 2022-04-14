@@ -31,6 +31,8 @@
 extern "C" {
 #endif
 
+#define C2000_PORT  (1)
+
 /**
  * @defgroup CO_STACK_CONFIG Stack configuration
  * Stack configuration and enabling macros.

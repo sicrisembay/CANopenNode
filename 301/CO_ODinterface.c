@@ -65,7 +65,21 @@ ODR_t OD_readOriginal(OD_stream_t *stream, void *buf,
         }
     }
 
+#if (C2000_PORT != 0)
+    if((stream->attribute & ODA_STR) == 0) {
+        if(stream->dataLength <= 2) {
+            /* For C2000, length of uint8_t and uint16_t OD variable is 1 */
+            memcpy(buf, dataOrig, 1);
+        } else {
+            memcpy(buf, dataOrig, dataLenToCopy / 2);
+        }
+    } else {
+        /* As-is for string */
+        memcpy(buf, dataOrig, dataLenToCopy);
+    }
+#else
     memcpy(buf, dataOrig, dataLenToCopy);
+#endif
 
     *countRead = dataLenToCopy;
     return returnCode;
@@ -116,7 +130,21 @@ ODR_t OD_writeOriginal(OD_stream_t *stream, const void *buf,
         return ODR_DATA_LONG;
     }
 
+#if (C2000_PORT != 0)
+    if((stream->attribute & ODA_STR) == 0) {
+        if(stream->dataLength <= 2) {
+            /* For C2000, length of uint8_t and uint16_t OD variable is 1 */
+            memcpy(dataOrig, buf, 1);
+        } else {
+            memcpy(dataOrig, buf, dataLenToCopy / 2);
+        }
+    } else {
+        /* As-is for string */
+        memcpy(dataOrig, buf, dataLenToCopy);
+    }
+#else
     memcpy(dataOrig, buf, dataLenToCopy);
+#endif
 
     *countWritten = dataLenToCopy;
     return returnCode;

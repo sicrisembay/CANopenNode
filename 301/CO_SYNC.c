@@ -84,7 +84,11 @@ static ODR_t OD_write_1005(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 4 || countWritten == NULL
+#else
         || count != sizeof(uint32_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -162,7 +166,11 @@ static ODR_t OD_write_1019(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 4 || countWritten == NULL
+#else
         || count != sizeof(uint8_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -248,7 +256,11 @@ CO_ReturnError_t CO_SYNC_init(CO_SYNC_t *SYNC,
 
     /* get and verify "Communication cycle period" from OD */
     SYNC->OD_1006_period = OD_getPtr(OD_1006_commCyclePeriod, 0,
+#if (C2000_PORT != 0)
+                                     4, NULL);
+#else
                                      sizeof(uint32_t), NULL);
+#endif
 #if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_PRODUCER
     if (SYNC->OD_1006_period == NULL) {
         if (errInfo != NULL) *errInfo = OD_getIndex(OD_1006_commCyclePeriod);
@@ -263,7 +275,11 @@ CO_ReturnError_t CO_SYNC_init(CO_SYNC_t *SYNC,
 
     /* get "Synchronous window length" from OD (optional parameter) */
     SYNC->OD_1007_window = OD_getPtr(OD_1007_syncWindowLen, 0,
+#if (C2000_PORT != 0)
+                                     4, NULL);
+#else
                                      sizeof(uint32_t), NULL);
+#endif
     if (OD_1007_syncWindowLen != NULL && SYNC->OD_1007_window == NULL) {
         if (errInfo != NULL) *errInfo = OD_getIndex(OD_1007_syncWindowLen);
         return CO_ERROR_OD_PARAMETERS;

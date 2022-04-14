@@ -622,70 +622,110 @@ ODR_t OD_get_value(const OD_entry_t *entry, uint8_t subIndex,
 static inline ODR_t OD_get_i8(const OD_entry_t *entry, uint8_t subIndex,
                               int8_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 1, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get int16_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_i16(const OD_entry_t *entry, uint8_t subIndex,
                                int16_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 2, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get int32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_i32(const OD_entry_t *entry, uint8_t subIndex,
                                int32_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 4, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get int64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_i64(const OD_entry_t *entry, uint8_t subIndex,
                                int64_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 8, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get uint8_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_u8(const OD_entry_t *entry, uint8_t subIndex,
                               uint8_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 1, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get uint16_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_u16(const OD_entry_t *entry, uint8_t subIndex,
                                uint16_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 2, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get uint32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_u32(const OD_entry_t *entry, uint8_t subIndex,
                                uint32_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 4, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get uint64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_u64(const OD_entry_t *entry, uint8_t subIndex,
                                uint64_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 8, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get float32_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_f32(const OD_entry_t *entry, uint8_t subIndex,
                                float32_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 4, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /** Get float64_t variable from Object Dictionary, see @ref OD_get_value */
 static inline ODR_t OD_get_f64(const OD_entry_t *entry, uint8_t subIndex,
                                float64_t *val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_get_value(entry, subIndex, val, 8, odOrig);
+#else
     return OD_get_value(entry, subIndex, val, sizeof(*val), odOrig);
+#endif
 }
 
 /**
@@ -709,70 +749,110 @@ ODR_t OD_set_value(const OD_entry_t *entry, uint8_t subIndex, void *val,
 static inline ODR_t OD_set_i8(const OD_entry_t *entry, uint8_t subIndex,
                               int8_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 1, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set int16_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_i16(const OD_entry_t *entry, uint8_t subIndex,
                                int16_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 2, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set int32_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_i32(const OD_entry_t *entry, uint8_t subIndex,
                                int32_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 4, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set int32_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_i64(const OD_entry_t *entry, uint8_t subIndex,
                                int64_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 8, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set uint8_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_u8(const OD_entry_t *entry, uint8_t subIndex,
                               uint8_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 1, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set uint16_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_u16(const OD_entry_t *entry, uint8_t subIndex,
                                uint16_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 2, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set uint32_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_u32(const OD_entry_t *entry, uint8_t subIndex,
                                uint32_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 4, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set uint64_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_u64(const OD_entry_t *entry, uint8_t subIndex,
                                uint64_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 8, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set float32_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_f32(const OD_entry_t *entry, uint8_t subIndex,
                                float32_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 4, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /** Set float64_t variable in Object Dictionary, see @ref OD_set_value */
 static inline ODR_t OD_set_f64(const OD_entry_t *entry, uint8_t subIndex,
                                float64_t val, bool_t odOrig)
 {
+#if C2000_PORT != 0
+    return OD_set_value(entry, subIndex, &val, 8, odOrig);
+#else
     return OD_set_value(entry, subIndex, &val, sizeof(val), odOrig);
+#endif
 }
 
 /**

@@ -738,15 +738,39 @@ void CO_CANmodule_process(CO_CANmodule_t *CANmodule);
  * @return Value
  */
 static inline uint8_t CO_getUint8(const void *buf) {
+#if (C2000_PORT != 0)
+    uint8_t value = 0;
+    value = *((uint8_t *)buf);
+    return value;
+#else
     uint8_t value; memmove(&value, buf, sizeof(value)); return value;
+#endif
 }
 /** Get uint16_t value from memory buffer, see @ref CO_getUint8 */
 static inline uint16_t CO_getUint16(const void *buf) {
+#if (C2000_PORT != 0)
+    uint16_t value = 0;
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    for (int i = 0; i < 2; i++) {
+        value += ((uint16_t)(pBuf8[i])) << (8 * i);
+    }
+    return value;
+#else
     uint16_t value; memmove(&value, buf, sizeof(value)); return value;
+#endif
 }
 /** Get uint32_t value from memory buffer, see @ref CO_getUint8 */
 static inline uint32_t CO_getUint32(const void *buf) {
+#if (C2000_PORT != 0)
+    uint32_t value = 0;
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    for(int i = 0; i < 4; i++) {
+        value += ((uint32_t)(pBuf8[i])) << (8 * i);
+    }
+    return value;
+#else
     uint32_t value; memmove(&value, buf, sizeof(value)); return value;
+#endif
 }
 
 /**
@@ -758,15 +782,36 @@ static inline uint32_t CO_getUint32(const void *buf) {
  * @return number of bytes written.
  */
 static inline uint8_t CO_setUint8(void *buf, uint8_t value) {
+#if (C2000_PORT != 0)
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    pBuf8[0] = value;
+    return 1;
+#else
     memmove(buf, &value, sizeof(value)); return sizeof(value);
+#endif
 }
 /** Write uint16_t value into memory buffer, see @ref CO_setUint8 */
 static inline uint8_t CO_setUint16(void *buf, uint16_t value) {
+#if (C2000_PORT != 0)
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    pBuf8[0] = (uint8_t)(value & 0x00FF);
+    pBuf8[1] = (uint8_t)((value >> 8) & 0x00FF);
+    return 2;
+#else
     memmove(buf, &value, sizeof(value)); return sizeof(value);
+#endif
 }
 /** Write uint32_t value into memory buffer, see @ref CO_setUint8 */
 static inline uint8_t CO_setUint32(void *buf, uint32_t value) {
+#if (C2000_PORT != 0)
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    for(int i = 0; i < 4; i++) {
+        pBuf8[i] = (uint8_t)((value >> (8 * i)) & 0x00FF);
+    }
+    return 4;
+#else
     memmove(buf, &value, sizeof(value)); return sizeof(value);
+#endif
 }
 
 /** @} */ /* CO_driver */
