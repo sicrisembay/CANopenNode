@@ -63,7 +63,11 @@ static ODR_t OD_write_1017(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 2 || countWritten == NULL
+#else
         || count != sizeof(uint16_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -75,7 +79,12 @@ static ODR_t OD_write_1017(OD_stream_t *stream, const void *buf,
     NMT->HBproducerTimer = 0;
 
     /* write value to the original location in the Object Dictionary */
+#if (C2000_PORT != 0)
+    uint16_t value = CO_getUint16(buf);
+    return OD_writeOriginal(stream, &value, count, countWritten);
+#else
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 
 

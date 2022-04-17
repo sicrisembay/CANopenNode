@@ -59,7 +59,11 @@ static ODR_t OD_read_1014(OD_stream_t *stream, void *buf,
                           OD_size_t count, OD_size_t *countRead)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count < 4 || countRead == NULL
+#else
         || count < sizeof(uint32_t) || countRead == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -72,8 +76,11 @@ static ODR_t OD_read_1014(OD_stream_t *stream, void *buf,
     COB_IDEmergency32 |= canId;
     CO_setUint32(buf, COB_IDEmergency32);
 
-
+#if (C2000_PORT != 0)
+    *countRead = 4;
+#else
     *countRead = sizeof(uint32_t);
+#endif
     return ODR_OK;
 }
 
@@ -81,7 +88,11 @@ static ODR_t OD_write_1014(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 4 || countRead == NULL
+#else
         || count != sizeof(uint32_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -118,7 +129,12 @@ static ODR_t OD_write_1014(OD_stream_t *stream, const void *buf,
     }
 
     /* write value to the original location in the Object Dictionary */
+#if (C2000_PORT != 0)
+    uint32_t value = CO_getUint32(buf);
+    return OD_writeOriginal(stream, &value, count, countWritten);
+#else
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
  #else
 /*
@@ -130,7 +146,11 @@ static ODR_t OD_read_1014_default(OD_stream_t *stream, void *buf,
                                   OD_size_t count, OD_size_t *countRead)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count < 4 || countRead == NULL
+#else
         || count < sizeof(uint32_t) || countRead == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -141,7 +161,11 @@ static ODR_t OD_read_1014_default(OD_stream_t *stream, void *buf,
     COB_IDEmergency32 |= CO_CAN_ID_EMERGENCY + em->nodeId;
     CO_setUint32(buf, COB_IDEmergency32);
 
+#if (C2000_PORT != 0)
+    *countRead = 4;
+#else
     *countRead = sizeof(uint32_t);
+#endif
     return ODR_OK;
 }
  #endif /* (CO_CONFIG_EM) & CO_CONFIG_EM_PROD_CONFIGURABLE */
@@ -156,7 +180,11 @@ static ODR_t OD_write_1015(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 2 || countWritten == NULL
+#else
         || count != sizeof(uint16_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -168,7 +196,12 @@ static ODR_t OD_write_1015(OD_stream_t *stream, const void *buf,
     em->inhibitEmTimer = 0;
 
     /* write value to the original location in the Object Dictionary */
+#if (C2000_PORT != 0)
+    uint16_t value  = CO_getUint16(buf);
+    return OD_writeOriginal(stream, &value, count, countWritten);
+#else
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
  #endif /* (CO_CONFIG_EM) & CO_CONFIG_EM_PROD_INHIBIT */
 #endif /* (CO_CONFIG_EM) & CO_CONFIG_EM_PRODUCER */
@@ -211,7 +244,11 @@ static ODR_t OD_read_1003(OD_stream_t *stream, void *buf,
         }
         CO_setUint32(buf, em->fifo[index].msg);
 
+#if (C2000_PORT != 0)
+        *countRead = 4;
+#else
         *countRead = sizeof(uint32_t);
+#endif
         return ODR_OK;
     }
     else {
@@ -327,8 +364,22 @@ static void CO_EM_receive(void *object, void *msg) {
             uint16_t errorCode;
             uint32_t infoCode;
 
+#if (C2000_PORT != 0)
+            errorCode = 0;
+            for(int i = 0; i < 2; i++) {
+                errorCode += (((uint16_t)(data[i])) & 0x00FF) << (i * 8);
+            }
+#else
             memcpy(&errorCode, &data[0], sizeof(errorCode));
+#endif
+#if (C2000_PORT != 0)
+            infoCode = 0;
+            for(int i = 0; i < 4; i++) {
+                infoCode += (((uint32_t)(data[i + 4])) & 0x00FF) << (i * 8);
+            }
+#else
             memcpy(&infoCode, &data[4], sizeof(infoCode));
+#endif
             em->pFunctSignalRx(ident,
                                CO_SWAP_16(errorCode),
                                data[2],
