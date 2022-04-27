@@ -91,8 +91,14 @@ static ODR_t PDOconfigMap(CO_PDO_common_t *PDO,
                           OD_t *OD)
 {
     uint16_t index = (uint16_t) (map >> 16);
+#if (C2000_PORT != 0)
+    /* Note: C2000 uint8_t is 16-bit wide */
+    uint8_t subIndex = (uint8_t) ((map >> 8) & 0x00FF);
+    uint8_t mappedLengthBits = (uint8_t)(map & 0x00FF);
+#else
     uint8_t subIndex = (uint8_t) (map >> 8);
     uint8_t mappedLengthBits = (uint8_t) map;
+#endif
     uint8_t mappedLength = mappedLengthBits >> 3;
     OD_IO_t *OD_IO = &PDO->OD_IO[mapIndex];
 
@@ -231,6 +237,11 @@ static CO_ReturnError_t PDO_initMapping(CO_PDO_common_t *PDO,
 static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
                                   OD_size_t count, OD_size_t *countWritten)
 {
+#if (C2000_PORT != 0)
+    void * pBufTemp = NULL;
+    uint32_t tempU32 = 0;
+    uint8_t tempU8 = 0;
+#endif
     /* "count" is already verified in *_init() function */
     if (stream == NULL || buf == NULL || countWritten == NULL
         || stream->subIndex > CO_PDO_MAX_MAPPED_ENTRIES
@@ -277,6 +288,10 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
         /* success, update PDO */
         PDO->dataLength = (CO_PDO_size_t)pdoDataLength;
         PDO->mappedObjectsCount = mappedObjectsCount;
+#if (C2000_PORT != 0)
+        tempU8 = CO_getUint8(buf);
+        pBufTemp = (void *)&tempU8;
+#endif
     }
     else {
         ODR_t odRet = PDOconfigMap(PDO, CO_getUint32(buf), stream->subIndex-1,
@@ -284,10 +299,18 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
         if (odRet != ODR_OK) {
             return odRet;
         }
+#if (C2000_PORT != 0)
+        tempU32 = CO_getUint32(buf);
+        pBufTemp = (void *)&tempU32;
+#endif
     }
 
     /* write value to the original location in the Object Dictionary */
+#if (C2000_PORT != 0)
+    return OD_writeOriginal(stream, pBufTemp, count, countWritten);
+#else
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC */
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_PDO_OD_IO_ACCESS */
@@ -418,7 +441,11 @@ static ODR_t OD_read_PDO_commParam(OD_stream_t *stream, void *buf,
     if (returnCode == ODR_OK && stream->subIndex == 1 && *countRead == 4) {
         /* Only common part of the CO_RPDO_t or CO_TPDO_t will be used */
         CO_PDO_common_t *PDO = stream->object;
+#if (C2000_PORT != 0)
+        uint32_t COB_ID = *((uint32_t *)buf);
+#else
         uint32_t COB_ID = CO_getUint32(buf);
+#endif
         uint16_t CAN_ID = (uint16_t)(COB_ID & 0x7FF);
 
         /* If default CAN-ID is stored in OD (without Node-ID), add Node-ID */
@@ -428,8 +455,11 @@ static ODR_t OD_read_PDO_commParam(OD_stream_t *stream, void *buf,
 
         /* If PDO is not valid, set bit 31 */
         if (!PDO->valid) COB_ID |= 0x80000000;
-
+#if (C2000_PORT != 0)
+        *((uint32_t *)buf) = COB_ID;
+#else
         CO_setUint32(buf, COB_ID);
+#endif
     }
 
     return returnCode;
@@ -1057,8 +1087,25 @@ static ODR_t OD_write_18xx(OD_stream_t *stream, const void *buf,
 #endif
     }
 
+#if (C2000_PORT != 0)
+    void * pBufTemp = bufCopy;
+    if((stream->attribute & ODA_STR) == 0) {
+        if(count == 1) {
+            *((uint8_t *)pBufTemp) = CO_getUint8(bufCopy);
+        } else if (count == 2) {
+            *((uint16_t *)pBufTemp) = CO_getUint16(bufCopy);
+        } else if (count == 4) {
+            *((uint32_t *)pBufTemp) = CO_getUint32(bufCopy);
+        } else {
+            /// TODO
+        }
+    }
+    /* write value to the original location in the Object Dictionary */
+    return OD_writeOriginal(stream, pBufTemp, count, countWritten);
+#else
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, bufCopy, count, countWritten);
+#endif
 }
 #endif /* (CO_CONFIG_PDO) & CO_CONFIG_FLAG_OD_DYNAMIC */
 
@@ -1261,6 +1308,22 @@ static CO_ReturnError_t CO_TPDOsend(CO_TPDO_t *TPDO) {
         stream->dataOffset= 0;
         OD_size_t countRd;
         OD_IO->read(stream, dataTPDOCopy, ODdataLength, &countRd);
+#if (C2000_PORT != 0)
+        if((stream->attribute & ODA_STR) == 0) {
+            uint8_t tempBuff[8] = {0};
+            for (int i = 0; i < countRd; i++) {
+                if((i % 2) == 0) {
+                    tempBuff[i] = (((uint16_t *)dataTPDOCopy)[i/2]) & 0x00FF;
+                } else {
+                    tempBuff[i] = ((((uint16_t *)dataTPDOCopy)[i/2]) >> 8) & 0x00FF;
+                }
+            }
+
+            for (int i = 0; i < countRd; i++) {
+                dataTPDOCopy[i] = tempBuff[i];
+            }
+        }
+#endif
         stream->dataOffset = mappedLength;
 
         /* swap multibyte data if big-endian */

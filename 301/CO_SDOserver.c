@@ -870,8 +870,25 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
                 bool_t lock = OD_mappable(&SDO->OD_IO.stream);
 
                 if (lock) { CO_LOCK_OD(SDO->CANdevTx); }
+#if (C2000_PORT != 0)
+                uint8_t bufTemp[6];
+                void * pbufTemp = (void *)bufTemp;
+                memcpy(bufTemp, buf, sizeof(buf));
+                if(SDO->OD_IO.write == OD_writeOriginal) {
+                    if(dataSizeToWrite == 1) {
+                        *((uint8_t *)pbufTemp) = CO_getUint8(buf);
+                    } else if(dataSizeToWrite == 2) {
+                        *((uint16_t *)pbufTemp) = CO_getUint16(buf);
+                    } else if(dataSizeToWrite == 4) {
+                        *((uint32_t *)pbufTemp) = CO_getUint32(buf);
+                    }
+                }
+                ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, bufTemp,
+                                               dataSizeToWrite, &countWritten);
+#else
                 ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, buf,
                                                dataSizeToWrite, &countWritten);
+#endif
                 if (lock) { CO_UNLOCK_OD(SDO->CANdevTx); }
 
                 if (odRet != ODR_OK) {

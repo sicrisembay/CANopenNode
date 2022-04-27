@@ -740,7 +740,7 @@ void CO_CANmodule_process(CO_CANmodule_t *CANmodule);
 static inline uint8_t CO_getUint8(const void *buf) {
 #if (C2000_PORT != 0)
     uint8_t value = 0;
-    value = *((uint8_t *)buf);
+    value = (*((uint8_t *)buf) & 0x00FF);
     return value;
 #else
     uint8_t value; memmove(&value, buf, sizeof(value)); return value;
