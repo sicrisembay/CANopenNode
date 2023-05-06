@@ -294,7 +294,8 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
 #endif
     }
     else {
-        ODR_t odRet = PDOconfigMap(PDO, CO_getUint32(buf), stream->subIndex-1,
+        uint32_t val = CO_getUint32(buf);
+        ODR_t odRet = PDOconfigMap(PDO, val, stream->subIndex-1,
                                    PDO->isRPDO, PDO->OD);
         if (odRet != ODR_OK) {
             return odRet;
@@ -958,7 +959,7 @@ void CO_RPDO_process(CO_RPDO_t *RPDO,
                                 CO_EMC_RPDO_TIMEOUT, RPDO->timeoutTimer);
                 }
             }
- #if (CO_CONFIG_SYNC) & CO_CONFIG_FLAG_TIMERNEXT
+ #if (CO_CONFIG_PDO) & CO_CONFIG_FLAG_TIMERNEXT
             if (timerNext_us != NULL
                 && RPDO->timeoutTimer < RPDO->timeoutTime_us
             ) {
@@ -1256,8 +1257,8 @@ CO_ReturnError_t CO_TPDO_init(CO_TPDO_t *TPDO,
     uint16_t eventTime = 0;
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 3, &inhibitTime, true);
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 5, &eventTime, true);
-    TPDO->inhibitTime_us = (uint32_t)inhibitTime * 100U;
-    TPDO->eventTime_us = (uint32_t)eventTime * 1000U;
+    TPDO->inhibitTime_us = (uint32_t)inhibitTime * 100;
+    TPDO->eventTime_us = (uint32_t)eventTime * 1000;
 #endif
 
 
@@ -1360,8 +1361,8 @@ static CO_ReturnError_t CO_TPDOsend(CO_TPDO_t *TPDO) {
         /* swap multibyte data if big-endian */
  #ifdef CO_BIG_ENDIAN
         if ((stream->attribute & ODA_MB) != 0) {
-            uint8_t *lo = dataOD;
-            uint8_t *hi = dataOD + ODdataLength - 1;
+            uint8_t *lo = dataTPDOCopy;
+            uint8_t *hi = dataTPDOCopy + ODdataLength - 1;
             while (lo < hi) {
                 uint8_t swap = *lo;
                 *lo++ = *hi;

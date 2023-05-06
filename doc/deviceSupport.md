@@ -3,7 +3,7 @@ Device Support
 
 CANopenNode can run on many different devices. There are possible many different implementations on many different hardware, with many different development tools, by many different developers. It is not possible for single project maintainer to keep all the hardware interfaces updated. For that reason all hardware specific files are not part of the CANopenNode project.
 
-It is necessary to implement interface to specific hardware. Interface to Linux socketCAN is part of this projects. Interfaces to other controllers are separate projects. There are interfaces to: Zephyr RTOS, PIC, Mbed-os RTOS + STM32, NXP, etc.
+It is necessary to implement interface to specific hardware. Interface to Linux socketCAN is part of this projects. Interfaces to other controllers are separate projects. There are interfaces to: Zephyr RTOS, PIC, [Analog Devices Inc. (ADI)](https://www.analog.com), Mbed-os RTOS + STM32, NXP, etc.
 
 
 Note for device driver contributors
@@ -25,23 +25,36 @@ Linux
 * CANopenNode integration with Linux socketCAN with master command interface. SocketCAN is part of the Linux kernel.
 * https://github.com/CANopenNode/CANopenLinux.
 * CANopenNode version: (v4.0)
-* Status: stable
 * Features: OD storage, error counters, master (SDO client, LSS master, NMT master)
 * Systems: Linux PC, Raspberry PI, etc.
-* Development tools: Linux
-* Information updated 2021-05-21
 
+
+STM32
+-----
+* CANopenNode integration with STM32 microcontrollers.
+* https://github.com/CANopenNode/CanOpenSTM32
+* CANopenNode version: (v4.0)
 
 PIC32, dsPIC30, dsPIC33
 -----------------------
 * CANopenNode integration with 16 and 32 bit PIC microcontrollers from Microchip.
 * https://github.com/CANopenNode/CANopenPIC
 * CANopenNode version: (v4.0)
-* Status: stable
 * Features: OD storage for PIC32, SDO client demo for PIC32, error counters
 * Development tools: MPLAB X
 * Demo hardware: Explorer 16 from Microchip, [Max32 board](https://reference.digilentinc.com/reference/microprocessor/max32/start)
-* Information updated 2021-05-07
+
+
+[Analog Devices Inc](https://www.analog.com): MAX32662, MAX32690
+------------------
+* CANopenNode integration with Analog Devices MAX32662 and MAX32690 microcontrollers.
+* https://github.com/Analog-Devices-MSDK/CANopenADI
+* CANopenNode version: (v4.0)
+* Status: seems to be stable
+* Features: LED indicators, error counters
+* Development tools: Maxim Micros SDK
+* Demo hardware: MAX32662-EVKIT and MAX32690-EVKIT
+* Information updated 2023-02-17 
 
 
 Zephyr RTOS
@@ -97,12 +110,13 @@ S32DS (NXP S32 Design studio for Arm or Powerpc)
 
 Other
 -----
-* [ESP32](https://github.com/CANopenNode/CANopenNode/issues/198#issuecomment-658429391), 2020-07-14
+* ESP32:
+  * 2023-03-11: https://github.com/CANopenNode/CANopenNode/issues/429
+  * 2020-07-14: https://github.com/CANopenNode/CANopenNode/issues/198#issuecomment-658429391
 * [FreeRTOS](https://github.com/martinwag/CANopenNode/tree/neuberger-freertos/stack/neuberger-FreeRTOS) by Neuberger, 2020-06-23, based on v1.3-master, see also [issue 198](https://github.com/CANopenNode/CANopenNode/issues/198).
 * [STM32CubeMX HAL](https://github.com/w1ne/CANOpenNode-CubeMX-HAL), 2019-05-03, demo project for Atollic studio, tested on Nucleo STM32L452xx board.
 * K64F_FreeRTOS, Kinetis SDK, 2018-02-13, [zip file](https://github.com/CANopenNode/CANopenNode/pull/28#issuecomment-365392867)
-* LPC1768 (MBED) (released in 2016) - [CANopenNode v1.0](https://github.com/CANopenNode/CANopenNode/tree/v1.0), [known example from 2016](https://github.com/exmachina-dev/CANopenMbed)
-
+* LPC1768 (MBED) (released in 2016) - [CANopenNode v1.0](https://github.com/CANopenNode/CANopenNode/tree/v1.0), [known example from 2016](https://github.com/exmachina-dev/CANopenMbe: d)
 
 Other old versions
 ------------------
