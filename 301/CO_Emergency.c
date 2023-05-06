@@ -308,7 +308,14 @@ static ODR_t OD_read_statusBits(OD_stream_t *stream, void *buf,
         stream->dataLength = countReadLocal;
     }
 
+#if (C2000_PORT != 0)
+    uint8_t * pBuf = (uint8_t *)buf;
+    for(uint16_t i = 0; i < countReadLocal; i++) {
+        pBuf[i] = em->errorStatusBits[i] & 0x00FF;
+    }
+#else
     memcpy (buf, &em->errorStatusBits[0], countReadLocal);
+#endif
 
     *countRead = countReadLocal;
     return ODR_OK;
@@ -337,7 +344,14 @@ static ODR_t OD_write_statusBits(OD_stream_t *stream, const void *buf,
         stream->dataLength = countWrite;
     }
 
+#if(C2000_PORT != 0)
+    uint8_t * pBuf = (uint8_t *)buf;
+    for(uint16_t i = 0; i < countWrite; i++) {
+        em->errorStatusBits[i] = pBuf[i] & 0x00FF;
+    }
+#else
     memcpy (&em->errorStatusBits[0], buf, countWrite);
+#endif
 
     *countWritten = countWrite;
     return ODR_OK;
@@ -369,15 +383,12 @@ static void CO_EM_receive(void *object, void *msg) {
             for(int i = 0; i < 2; i++) {
                 errorCode += (((uint16_t)(data[i])) & 0x00FF) << (i * 8);
             }
-#else
-            memcpy(&errorCode, &data[0], sizeof(errorCode));
-#endif
-#if (C2000_PORT != 0)
             infoCode = 0;
             for(int i = 0; i < 4; i++) {
                 infoCode += (((uint32_t)(data[i + 4])) & 0x00FF) << (i * 8);
             }
 #else
+            memcpy(&errorCode, &data[0], sizeof(errorCode));
             memcpy(&infoCode, &data[4], sizeof(infoCode));
 #endif
             em->pFunctSignalRx(ident,
@@ -696,8 +707,18 @@ void CO_EM_process(CO_EM_t *em,
             em->fifo[fifoPpPtr].msg |= (uint32_t) errorRegister << 16;
 
             /* send emergency message */
+#if (C2000_PORT != 0)
+            uint16_t * pMsgInfo = (uint16_t *)&(em->fifo[fifoPpPtr].msg);
+            for(uint16_t idx = 0; idx < 8; idx++) {
+                em->CANtxBuff->data[idx] = (*pMsgInfo) & 0x00FF;
+                idx++;
+                em->CANtxBuff->data[idx] = ((*pMsgInfo) >> 8) & 0x00FF;
+                pMsgInfo++;
+            }
+#else
             memcpy(em->CANtxBuff->data, &em->fifo[fifoPpPtr].msg,
                 sizeof(em->CANtxBuff->data));
+#endif
             CO_CANsend(em->CANdevTx, em->CANtxBuff);
 
  #if (CO_CONFIG_EM) & CO_CONFIG_EM_CONSUMER

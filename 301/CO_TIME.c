@@ -65,7 +65,11 @@ static ODR_t OD_write_1012(OD_stream_t *stream, const void *buf,
                            OD_size_t count, OD_size_t *countWritten)
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
+#if (C2000_PORT != 0)
+        || count != 4 || countWritten == NULL
+#else
         || count != sizeof(uint32_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -83,8 +87,13 @@ static ODR_t OD_write_1012(OD_stream_t *stream, const void *buf,
     TIME->isConsumer = (cobIdTimeStamp & 0x80000000L) != 0;
     TIME->isProducer = (cobIdTimeStamp & 0x40000000L) != 0;
 
+#if (C2000_PORT != 0)
+    /* write value to the original location in the Object Dictionary */
+    return OD_writeOriginal(stream, &cobIdTimeStamp, count, countWritten);
+#else
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 #endif
 

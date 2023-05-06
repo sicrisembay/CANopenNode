@@ -91,7 +91,11 @@ static ODR_t OD_write_1016(OD_stream_t *stream, const void *buf,
     if (stream == NULL || buf == NULL
         || stream->subIndex < 1
         || stream->subIndex > HBcons->numberOfMonitoredNodes
+#if (C2000_PORT != 0)
+        || count != 4 || countWritten == NULL
+#else
         || count != sizeof(uint32_t) || countWritten == NULL
+#endif
     ) {
         return ODR_DEV_INCOMPAT;
     }
@@ -105,8 +109,13 @@ static ODR_t OD_write_1016(OD_stream_t *stream, const void *buf,
         return ODR_PAR_INCOMPAT;
     }
 
+#if (C2000_PORT != 0)
+    /* write value to the original location in the Object Dictionary */
+    return OD_writeOriginal(stream, &val, count, countWritten);
+#else
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 #endif
 

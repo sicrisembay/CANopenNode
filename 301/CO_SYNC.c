@@ -152,8 +152,13 @@ static ODR_t OD_write_1005(OD_stream_t *stream, const void *buf,
     }
 #endif /* CO_CONFIG_SYNC) & CO_CONFIG_SYNC_PRODUCER */
 
+#if (C2000_PORT != 0)
+    /* write value to the original location in the Object Dictionary */
+    return OD_writeOriginal(stream, &cobIdSync, count, countWritten);
+#else
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 
 #if (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_PRODUCER
@@ -167,7 +172,7 @@ static ODR_t OD_write_1019(OD_stream_t *stream, const void *buf,
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
 #if (C2000_PORT != 0)
-        || count != 4 || countWritten == NULL
+        || count != 1 || countWritten == NULL
 #else
         || count != sizeof(uint8_t) || countWritten == NULL
 #endif
@@ -202,8 +207,13 @@ static ODR_t OD_write_1019(OD_stream_t *stream, const void *buf,
 
     SYNC->counterOverflowValue = syncCounterOvf;
 
+#if (C2000_PORT != 0)
+    /* write value to the original location in the Object Dictionary */
+    return OD_writeOriginal(stream, &syncCounterOvf, count, countWritten);
+#else
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, buf, count, countWritten);
+#endif
 }
 #endif /* (CO_CONFIG_SYNC) & CO_CONFIG_SYNC_PRODUCER */
 #endif /* (CO_CONFIG_SYNC) & CO_CONFIG_FLAG_OD_DYNAMIC */

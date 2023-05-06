@@ -647,6 +647,17 @@ static ODR_t OD_write_14xx(OD_stream_t *stream, const void *buf,
 #endif
     }
 
+#if (C2000_PORT != 0)
+    void * pBufCopy = (void *)bufCopy;
+    if(count == 1) {
+        *((uint8_t *)pBufCopy) = CO_getUint8(buf);
+    } else if(count == 2) {
+        *((uint16_t *)pBufCopy) = CO_getUint16(buf);
+    } else if(count == 4) {
+        *((uint32_t *)pBufCopy) = CO_getUint32(buf);
+    }
+#endif
+
     /* write value to the original location in the Object Dictionary */
     return OD_writeOriginal(stream, bufCopy, count, countWritten);
 }
@@ -764,7 +775,7 @@ CO_ReturnError_t CO_RPDO_init(CO_RPDO_t *RPDO,
 #if (CO_CONFIG_PDO) & CO_CONFIG_RPDO_TIMERS_ENABLE
     uint16_t eventTime = 0;
     odRet = OD_get_u16(OD_14xx_RPDOCommPar, 5, &eventTime, true);
-    RPDO->timeoutTime_us = (uint32_t)eventTime * 1000;
+    RPDO->timeoutTime_us = (uint32_t)eventTime * 1000U;
 #endif
 
 
@@ -1088,7 +1099,7 @@ static ODR_t OD_write_18xx(OD_stream_t *stream, const void *buf,
 
     case 5: { /* event-timer */
         uint32_t eventTime = CO_getUint16(buf);
-        TPDO->eventTime_us = eventTime * 1000;
+        TPDO->eventTime_us = eventTime * 1000U;
         TPDO->eventTimer = 0;
         break;
     }
@@ -1245,8 +1256,8 @@ CO_ReturnError_t CO_TPDO_init(CO_TPDO_t *TPDO,
     uint16_t eventTime = 0;
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 3, &inhibitTime, true);
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 5, &eventTime, true);
-    TPDO->inhibitTime_us = inhibitTime * 100;
-    TPDO->eventTime_us = eventTime * 1000;
+    TPDO->inhibitTime_us = (uint32_t)inhibitTime * 100U;
+    TPDO->eventTime_us = (uint32_t)eventTime * 1000U;
 #endif
 
 
