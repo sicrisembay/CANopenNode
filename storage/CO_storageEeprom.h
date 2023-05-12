@@ -30,6 +30,12 @@
 
 #if ((CO_CONFIG_STORAGE) & CO_CONFIG_STORAGE_ENABLE) || defined CO_DOXYGEN
 
+#if (C2000_PORT != 0)
+  #ifndef CO_CONFIG_STORAGE_MAX_ENTRIES
+    #define CO_CONFIG_STORAGE_MAX_ENTRIES   (2)
+  #endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

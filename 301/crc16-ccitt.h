@@ -76,10 +76,15 @@ void crc16_ccitt_single(uint16_t *crc, const uint8_t chr);
  *
  * @return Calculated CRC.
  */
+#if (C2000_PORT != 0)
+uint16_t crc16_ccitt(uint8_t * block,
+                     size_t blockLength,
+                     uint16_t crc);
+#else
 uint16_t crc16_ccitt(const uint8_t block[],
                      size_t blockLength,
                      uint16_t crc);
-
+#endif
 
 /** @} */ /* CO_crc16_ccitt */
 

@@ -146,11 +146,17 @@ CO_ReturnError_t CO_storageEeprom_init(CO_storage_t *storage,
     }
 
     /* Read entry signatures from the eeprom */
+#if (C2000_PORT != 0)
+    uint32_t signatures[CO_CONFIG_STORAGE_MAX_ENTRIES];     /* This is workaround for weird C2000 dynamic allocation that
+                                                             * ends up with very huge heap usage */
+#else
     uint32_t signatures[entriesCount];
+#endif
     size_t signaturesAddress = CO_eeprom_getAddr(storageModule,
                                                  false,
                                                  sizeof(signatures),
                                                  &eepromOvf);
+
     CO_eeprom_readBlock(storageModule,
                         (uint8_t *)signatures,
                         signaturesAddress,
@@ -169,7 +175,7 @@ CO_ReturnError_t CO_storageEeprom_init(CO_storage_t *storage,
         }
 
         /* calculate addresses inside eeprom */
-        entry->eepromAddrSignature = signaturesAddress + sizeof(uint32_t) * i;
+        entry->eepromAddrSignature = signaturesAddress + (sizeof(uint32_t) * 2) * i;  // Note: sizeof(uint32_t) is 2 for C2000
         entry->eepromAddr = CO_eeprom_getAddr(storageModule,
                                               isAuto,
                                               entry->len,

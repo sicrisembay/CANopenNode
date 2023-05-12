@@ -72,7 +72,11 @@ static ODR_t OD_write_1010(OD_stream_t *stream, const void *buf,
     if (found != 2)
         returnCode = found == 0 ? ODR_SUB_NOT_EXIST : ODR_READONLY;
 
+#if (C2000_PORT != 0)
+    if (returnCode == ODR_OK) *countWritten = 4;
+#else
     if (returnCode == ODR_OK) *countWritten = sizeof(uint32_t);
+#endif
     return returnCode;
 }
 
@@ -114,16 +118,23 @@ static ODR_t OD_write_1011(OD_stream_t *stream, const void *buf,
             if (found == 0) found = 1;
             if ((entry->attr & CO_storage_restore) != 0) {
                 ODR_t code = storage->restore(entry, storage->CANmodule);
-                if (code != ODR_OK) returnCode = code;
+                if (code != ODR_OK) {
+                    returnCode = code;
+                }
                 found = 2;
             }
         }
     }
 
-    if (found != 2)
+    if (found != 2) {
         returnCode = found == 0 ? ODR_SUB_NOT_EXIST : ODR_READONLY;
+    }
 
+#if (C2000_PORT != 0)
+    if (returnCode == ODR_OK) *countWritten = 4;
+#else
     if (returnCode == ODR_OK) *countWritten = sizeof(uint32_t);
+#endif
     return returnCode;
 }
 
