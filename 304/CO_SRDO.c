@@ -41,6 +41,9 @@
 #define CO_SRDO_VALID_MAGIC    (0xA5)
 
 
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_SRDO_receive_normal, "ramfuncs");
+#endif
 static void CO_SRDO_receive_normal(void *object, void *msg){
     CO_SRDO_t *SRDO;
     uint8_t DLC = CO_CANrxMsg_readDLC(msg);
@@ -64,6 +67,9 @@ static void CO_SRDO_receive_normal(void *object, void *msg){
     }
 }
 
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_SRDO_receive_inverted, "ramfuncs");
+#endif
 static void CO_SRDO_receive_inverted(void *object, void *msg){
     CO_SRDO_t *SRDO;
     uint8_t DLC = CO_CANrxMsg_readDLC(msg);

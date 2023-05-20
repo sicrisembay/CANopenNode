@@ -36,6 +36,9 @@
  * message with correct identifier will be received. For more information and
  * description of parameters see file CO_driver.h.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_TIME_receive, "ramfuncs");
+#endif
 static void CO_TIME_receive(void *object, void *msg) {
     CO_TIME_t *TIME = object;
     uint8_t DLC = CO_CANrxMsg_readDLC(msg);

@@ -366,6 +366,9 @@ static ODR_t OD_write_statusBits(OD_stream_t *stream, const void *buf,
  * message with correct identifier will be received. For more information and
  * description of parameters see file CO_driver.h.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_EM_receive, "ramfuncs");
+#endif
 static void CO_EM_receive(void *object, void *msg) {
     CO_EM_t *em = (CO_EM_t*)object;
 

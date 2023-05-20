@@ -74,6 +74,9 @@ typedef enum {
  * message with correct identifier will be received. For more information and
  * description of parameters see file CO_driver.h.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_LSSmaster_receive, "ramfuncs");
+#endif
 static void CO_LSSmaster_receive(void *object, void *msg)
 {
     CO_LSSmaster_t *LSSmaster;

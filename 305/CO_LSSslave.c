@@ -49,6 +49,9 @@
  * message with correct identifier will be received. For more information and
  * description of parameters see file CO_driver.h.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_LSSslave_receive, "ramfuncs");
+#endif
 static void CO_LSSslave_receive(void *object, void *msg)
 {
     CO_LSSslave_t *LSSslave = (CO_LSSslave_t*)object;

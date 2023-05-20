@@ -34,6 +34,9 @@
  * message with correct identifier will be received. For more information and
  * description of parameters see file CO_driver.h.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_SYNC_receive, "ramfuncs");
+#endif
 static void CO_SYNC_receive(void *object, void *msg) {
     CO_SYNC_t *SYNC = object;
     uint8_t DLC = CO_CANrxMsg_readDLC(msg);

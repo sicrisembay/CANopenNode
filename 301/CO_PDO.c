@@ -493,6 +493,9 @@ typedef enum {
  * If new message arrives and previous message wasn't processed yet, then
  * previous message will be lost and overwritten by the new message.
  */
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_PDO_receive, "ramfuncs");
+#endif
 static void CO_PDO_receive(void *object, void *msg) {
     CO_RPDO_t *RPDO = object;
     CO_PDO_common_t *PDO = &RPDO->PDO_common;

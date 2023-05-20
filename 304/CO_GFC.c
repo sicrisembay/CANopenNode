@@ -29,6 +29,9 @@
 
 #if (CO_CONFIG_GFC) & CO_CONFIG_GFC_CONSUMER
 
+#if(C2000_PORT != 0)
+#pragma CODE_SECTION(CO_GFC_receive, "ramfuncs");
+#endif
 static void CO_GFC_receive(void *object, void *msg)
 {
     CO_GFC_t *GFC;
