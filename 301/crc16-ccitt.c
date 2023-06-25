@@ -102,17 +102,8 @@ uint16_t crc16_ccitt(const uint8_t block[],
     size_t i;
 
     for (i = 0U; i < blockLength; i++) {
-#if (C2000_PORT != 0)
-        uint8_t tmp;
-        uint16_t tmpData = ((uint16_t *)block)[i];
-        tmp = (uint8_t)((crc >> 8U) & 0x00FF) ^ (tmpData & 0x00FF);
-        crc = (crc << 8U) ^ crc16_ccitt_table[tmp];
-        tmp = (uint8_t)((crc >> 8U) & 0x00FF) ^ ((tmpData >> 8) & 0x00FF);
-        crc = (crc << 8U) ^ crc16_ccitt_table[tmp];
-#else
         uint8_t tmp = (uint8_t)((crc >> 8U) & 0x00FF) ^ block[i];
         crc = (crc << 8U) ^ crc16_ccitt_table[tmp];
-#endif
     }
     return crc;
 }

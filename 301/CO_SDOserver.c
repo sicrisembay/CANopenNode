@@ -1387,7 +1387,11 @@ CO_SDO_return_t CO_SDOserver_process(CO_SDOserver_t *SDO,
 #endif /* (CO_CONFIG_SDO_SRV) & CO_CONFIG_SDO_SRV_SEGMENTED */
 
             /* send message */
+#if (C2000_PORT != 0)
+            SDO->CANtxBuff->data[1] = (uint8_t)(SDO->index & 0x00FF);
+#else
             SDO->CANtxBuff->data[1] = (uint8_t)SDO->index;
+#endif
             SDO->CANtxBuff->data[2] = (uint8_t)(SDO->index >> 8);
             SDO->CANtxBuff->data[3] = SDO->subIndex;
             CO_CANsend(SDO->CANdevTx, SDO->CANtxBuff);

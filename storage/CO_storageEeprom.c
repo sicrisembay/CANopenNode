@@ -175,7 +175,11 @@ CO_ReturnError_t CO_storageEeprom_init(CO_storage_t *storage,
         }
 
         /* calculate addresses inside eeprom */
-        entry->eepromAddrSignature = signaturesAddress + (sizeof(uint32_t) * 2) * i;  // Note: sizeof(uint32_t) is 2 for C2000
+#if (C2000_PORT != 0)
+        entry->eepromAddrSignature = signaturesAddress + 4 * i;
+#else
+        entry->eepromAddrSignature = signaturesAddress + sizeof(uint32_t) * i;
+#endif
         entry->eepromAddr = CO_eeprom_getAddr(storageModule,
                                               isAuto,
                                               entry->len,
