@@ -1,3 +1,27 @@
+/*
+ * CANopen Managers (CiA DSP 302 v3.2.1)
+ *
+ * @file        CO_BootUp.h
+ * @ingroup     CO_BootUp
+ * @author      Sicris Rey Embay
+ * @copyright   2024 Sicris Rey Embay
+ *
+ * This file is part of CANopenNode, an opensource CANopen Stack.
+ * Project home page is <https://github.com/CANopenNode/CANopenNode>.
+ * For more information on CANopen see <http://www.can-cia.org/>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #ifndef CO_BOOTUP_H
 #define CO_BOOTUP_H
 
@@ -56,5 +80,7 @@ typedef enum {
 typedef struct {
     CO_NMT_t *nmt;
 } CO_BOOT_t;
+
+CO_ReturnError_t CO_BOOT_init();
 
 #endif /* CO_BOOTUP_H */
