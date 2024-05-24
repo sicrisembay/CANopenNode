@@ -86,25 +86,53 @@ static void CO_LSSslave_receive(void *object, void *msg)
             switch (cs) {
             case CO_LSS_SWITCH_STATE_SEL_VENDOR: {
                 uint32_t valSw;
+#if (C2000_PORT != 0)
+                valSw = data[4] & 0x00FF;
+                valSw = (valSw << 8) | (data[3] & 0x00FF);
+                valSw = (valSw << 8) | (data[2] & 0x00FF);
+                valSw = (valSw << 8) | (data[1] & 0x00FF);
+#else
                 memcpy(&valSw, &data[1], sizeof(valSw));
+#endif
                 LSSslave->lssSelect.identity.vendorID = CO_SWAP_32(valSw);
                 break;
             }
             case CO_LSS_SWITCH_STATE_SEL_PRODUCT: {
                 uint32_t valSw;
+#if (C2000_PORT != 0)
+                valSw = data[4] & 0x00FF;
+                valSw = (valSw << 8) | (data[3] & 0x00FF);
+                valSw = (valSw << 8) | (data[2] & 0x00FF);
+                valSw = (valSw << 8) | (data[1] & 0x00FF);
+#else
                 memcpy(&valSw, &data[1], sizeof(valSw));
+#endif
                 LSSslave->lssSelect.identity.productCode = CO_SWAP_32(valSw);
                 break;
             }
             case CO_LSS_SWITCH_STATE_SEL_REV: {
                 uint32_t valSw;
+#if (C2000_PORT != 0)
+                valSw = data[4] & 0x00FF;
+                valSw = (valSw << 8) | (data[3] & 0x00FF);
+                valSw = (valSw << 8) | (data[2] & 0x00FF);
+                valSw = (valSw << 8) | (data[1] & 0x00FF);
+#else
                 memcpy(&valSw, &data[1], sizeof(valSw));
+#endif
                 LSSslave->lssSelect.identity.revisionNumber = CO_SWAP_32(valSw);
                 break;
             }
             case CO_LSS_SWITCH_STATE_SEL_SERIAL: {
                 uint32_t valSw;
+#if (C2000_PORT != 0)
+                valSw = data[4] & 0x00FF;
+                valSw = (valSw << 8) | (data[3] & 0x00FF);
+                valSw = (valSw << 8) | (data[2] & 0x00FF);
+                valSw = (valSw << 8) | (data[1] & 0x00FF);
+#else
                 memcpy(&valSw, &data[1], sizeof(valSw));
+#endif
                 LSSslave->lssSelect.identity.serialNumber = CO_SWAP_32(valSw);
 
                 if (CO_LSS_ADDRESS_EQUAL(LSSslave->lssAddress,
@@ -135,7 +163,14 @@ static void CO_LSSslave_receive(void *object, void *msg)
                         break;
                     }
 
+#if (C2000_PORT != 0)
+                    valSw = data[4] & 0x00FF;
+                    valSw = (valSw << 8) | (data[3] & 0x00FF);
+                    valSw = (valSw << 8) | (data[2] & 0x00FF);
+                    valSw = (valSw << 8) | (data[1] & 0x00FF);
+#else
                     memcpy(&valSw, &data[1], sizeof(valSw));
+#endif
                     idNumber = CO_SWAP_32(valSw);
                     ack = false;
 
@@ -447,28 +482,56 @@ bool_t CO_LSSslave_process(CO_LSSslave_t *LSSslave) {
         case CO_LSS_INQUIRE_VENDOR: {
             LSSslave->TXbuff->data[0] = LSSslave->service;
             valSw = CO_SWAP_32(LSSslave->lssAddress.identity.vendorID);
+#if (C2000_PORT != 0)
+            LSSslave->TXbuff->data[1] = valSw & 0x00FF;
+            LSSslave->TXbuff->data[2] = (valSw >> 8) & 0x00FF;
+            LSSslave->TXbuff->data[3] = (valSw >> 16) & 0x00FF;
+            LSSslave->TXbuff->data[4] = (valSw >> 24) & 0x00FF;
+#else
             memcpy(&LSSslave->TXbuff->data[1], &valSw, sizeof(valSw));
+#endif
             CANsend = true;
             break;
         }
         case CO_LSS_INQUIRE_PRODUCT: {
             LSSslave->TXbuff->data[0] = LSSslave->service;
             valSw = CO_SWAP_32(LSSslave->lssAddress.identity.productCode);
+#if (C2000_PORT != 0)
+            LSSslave->TXbuff->data[1] = valSw & 0x00FF;
+            LSSslave->TXbuff->data[2] = (valSw >> 8) & 0x00FF;
+            LSSslave->TXbuff->data[3] = (valSw >> 16) & 0x00FF;
+            LSSslave->TXbuff->data[4] = (valSw >> 24) & 0x00FF;
+#else
             memcpy(&LSSslave->TXbuff->data[1], &valSw, sizeof(valSw));
+#endif
             CANsend = true;
             break;
         }
         case CO_LSS_INQUIRE_REV: {
             LSSslave->TXbuff->data[0] = LSSslave->service;
             valSw = CO_SWAP_32(LSSslave->lssAddress.identity.revisionNumber);
+#if (C2000_PORT != 0)
+            LSSslave->TXbuff->data[1] = valSw & 0x00FF;
+            LSSslave->TXbuff->data[2] = (valSw >> 8) & 0x00FF;
+            LSSslave->TXbuff->data[3] = (valSw >> 16) & 0x00FF;
+            LSSslave->TXbuff->data[4] = (valSw >> 24) & 0x00FF;
+#else
             memcpy(&LSSslave->TXbuff->data[1], &valSw, sizeof(valSw));
+#endif
             CANsend = true;
             break;
         }
         case CO_LSS_INQUIRE_SERIAL: {
             LSSslave->TXbuff->data[0] = LSSslave->service;
             valSw = CO_SWAP_32(LSSslave->lssAddress.identity.serialNumber);
+#if (C2000_PORT != 0)
+            LSSslave->TXbuff->data[1] = valSw & 0x00FF;
+            LSSslave->TXbuff->data[2] = (valSw >> 8) & 0x00FF;
+            LSSslave->TXbuff->data[3] = (valSw >> 16) & 0x00FF;
+            LSSslave->TXbuff->data[4] = (valSw >> 24) & 0x00FF;
+#else
             memcpy(&LSSslave->TXbuff->data[1], &valSw, sizeof(valSw));
+#endif
             CANsend = true;
             break;
         }
