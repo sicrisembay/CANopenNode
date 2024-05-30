@@ -207,11 +207,27 @@ CO_ReturnError_t CO_storageEeprom_init(CO_storage_t *storage,
         else {
             /* Read data into storage location */
             CO_eeprom_readBlock(entry->storageModule, entry->addr,
+#if (C2000_PORT != 0)
+                                entry->eepromAddr, entry->len / 2);  // For C2000, length is in words, not bytes
+#else
                                 entry->eepromAddr, entry->len);
+#endif
 
             /* Verify CRC, except for auto storage variables */
             if (!isAuto) {
+#if (C2000_PORT != 0)
+                uint16_t crc = 0;
+                uint8_t chr = 0;
+                for(uint16_t j = 0; j < (entry->len / 2); j++) {
+                    uint16_t word = ((uint16_t *)entry->addr)[j];
+                    chr = word & 0x00FF;
+                    crc16_ccitt_single(&crc, chr);
+                    chr = (word >> 8) & 0x00FF;
+                    crc16_ccitt_single(&crc, chr);
+                }
+#else
                 uint16_t crc = crc16_ccitt(entry->addr, entry->len, 0);
+#endif
                 if (crc != entry->crc) {
                     dataCorrupt = true;
                 }
