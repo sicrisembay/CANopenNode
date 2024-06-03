@@ -38,13 +38,32 @@ static ODR_t storeEeprom(CO_storage_entry_t *entry, CO_CANmodule_t *CANmodule) {
     bool_t writeOk;
 
     /* save data to the eeprom */
+#if (C2000_PORT != 0)
+    writeOk = CO_eeprom_writeBlock(entry->storageModule, entry->addr,
+                                   entry->eepromAddr, entry->len / 2);  // For C2000, length is in words, not bytes
+    entry->crc = 0;
+    uint16_t word = 0;
+    uint8_t chr = 0;
+    for(uint16_t i = 0; i < (entry->len / 2); i++) {
+        word = ((uint16_t *)entry->addr)[i];
+        chr = word & 0x00FF;
+        crc16_ccitt_single(&(entry->crc), chr);
+        chr = (word >> 8) & 0x00FF;
+        crc16_ccitt_single(&(entry->crc), chr);
+    }
+#else
     writeOk = CO_eeprom_writeBlock(entry->storageModule, entry->addr,
                                    entry->eepromAddr, entry->len);
     entry->crc = crc16_ccitt(entry->addr, entry->len, 0);
+#endif
 
     /* Verify, if data in eeprom are equal */
     uint16_t crc_read = CO_eeprom_getCrcBlock(entry->storageModule,
+#if (C2000_PORT != 0)
+                                              entry->eepromAddr, entry->len / 2);  // For C2000, length is in words, not bytes
+#else
                                               entry->eepromAddr, entry->len);
+#endif
     if (entry->crc != crc_read || !writeOk) {
         return ODR_HW;
     }
@@ -254,7 +273,6 @@ void CO_storageEeprom_auto_process(CO_storage_t *storage, bool_t saveAll) {
     if (storage == NULL || !storage->enabled) {
         return;
     }
-
     /* loop through entries */
     for (uint8_t i = 0; i < storage->entriesCount; i++) {
         CO_storage_entry_t *entry = &storage->entries[i];
@@ -264,6 +282,18 @@ void CO_storageEeprom_auto_process(CO_storage_t *storage, bool_t saveAll) {
 
         if (saveAll) {
             /* update all bytes */
+#if (C2000_PORT != 0)
+            for (size_t i = 0; i < (entry->len/2); ) {
+                uint16_t dataWordToUpdate = ((uint16_t *)(entry->addr))[i];
+                size_t eepromAddr = entry->eepromAddr + (2 * i);
+                if (CO_eeprom_updateWord(entry->storageModule,
+                                         dataWordToUpdate,
+                                         eepromAddr)
+                ) {
+                    i++;
+                }
+            }
+#else
             for (size_t i = 0; i < entry->len; ) {
                 uint8_t dataByteToUpdate = ((uint8_t *)(entry->addr))[i];
                 size_t eepromAddr = entry->eepromAddr + i;
@@ -274,9 +304,22 @@ void CO_storageEeprom_auto_process(CO_storage_t *storage, bool_t saveAll) {
                     i++;
                 }
             }
+#endif
         }
         else {
             /* update one data byte and if successful increment to next */
+#if (C2000_PORT != 0)
+            uint16_t dataWordToUpdate = ((uint16_t *)(entry->addr))[entry->offset];
+            size_t eepromAddr = entry->eepromAddr + (entry->offset * 2);
+            if (CO_eeprom_updateWord(entry->storageModule,
+                                     dataWordToUpdate,
+                                     eepromAddr)
+            ) {
+                if (++entry->offset >= (entry->len / 2)) {
+                    entry->offset = 0;
+                }
+            }
+#else
             uint8_t dataByteToUpdate = ((uint8_t*)(entry->addr))[entry->offset];
             size_t eepromAddr = entry->eepromAddr + entry->offset;
             if (CO_eeprom_updateByte(entry->storageModule, dataByteToUpdate,
@@ -286,6 +329,7 @@ void CO_storageEeprom_auto_process(CO_storage_t *storage, bool_t saveAll) {
                     entry->offset = 0;
                 }
             }
+#endif
         }
     }
 }

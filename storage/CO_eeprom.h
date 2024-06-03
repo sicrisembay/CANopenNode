@@ -123,6 +123,23 @@ uint16_t CO_eeprom_getCrcBlock(void *storageModule,
 bool_t CO_eeprom_updateByte(void *storageModule, uint8_t data,
                             size_t eepromAddr);
 
+#if (C2000_PORT != 0)
+/**
+ * Update one word of data in the eeprom, target system specific function.
+ *
+ * Function is used by automatic storage. It updates word in eeprom only if
+ * differs from data.
+ *
+ * @param storageModule Pointer to storage module.
+ * @param data Data word to be written
+ * @param eepromAddr Address in eeprom, from where data will be updated.
+ *
+ * @return true if write was successful or false, if still waiting previous
+ * data to finish writing.
+ */
+bool_t CO_eeprom_updateWord(void *storageModule, uint16_t data,
+                            size_t eepromAddr);
+#endif
 
 /** @} */ /* CO_storage_eeprom */
 
