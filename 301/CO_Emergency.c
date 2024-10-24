@@ -89,7 +89,7 @@ static ODR_t OD_write_1014(OD_stream_t *stream, const void *buf,
 {
     if (stream == NULL || stream->subIndex != 0 || buf == NULL
 #if (C2000_PORT != 0)
-        || count != 4 || countRead == NULL
+        || count != 4 || countWritten == NULL
 #else
         || count != sizeof(uint32_t) || countWritten == NULL
 #endif
