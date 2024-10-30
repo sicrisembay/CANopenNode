@@ -772,6 +772,22 @@ static inline uint32_t CO_getUint32(const void *buf) {
 #endif
 }
 
+/** Get float value from memory buffer */
+static inline float CO_getReal32(const void * buf)
+{
+#if (C2000_PORT != 0)
+    float value = 0.0f;
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    for(int i = 0; i < 4; i++) {
+        *((uint32_t *)&value) += ((uint32_t)(pBuf8[i])) << (8 * i);
+    }
+    return value;
+#else
+    float value; memmove(&value, buf, sizeof(value)); return value;
+#endif
+}
+
+
 /**
  * Write uint8_t value into memory buffer
  *
@@ -810,6 +826,19 @@ static inline uint8_t CO_setUint32(void *buf, uint32_t value) {
     return 4;
 #else
     memmove(buf, &value, sizeof(value)); return sizeof(value);
+#endif
+}
+/** Write float value into memory buffer */
+static inline uint8_t CO_setReal32(void *buf, float fValue) {
+#if (C2000_PORT != 0)
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    uint32_t value = *((uint32_t *)&fValue);
+    for(int i = 0; i < 4; i++) {
+        pBuf8[i] = (uint8_t)((value >> (8 * i)) & 0x00FF);
+    }
+    return 4;
+#else
+    memmove(buf, &fValue, sizeof(fValue)); return sizeof(fValue);
 #endif
 }
 
