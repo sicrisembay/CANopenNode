@@ -104,6 +104,17 @@ uint16_t CO_eeprom_getCrcBlock(void* storageModule, size_t eepromAddr, size_t le
  */
 bool_t CO_eeprom_updateByte(void* storageModule, uint8_t data, size_t eepromAddr);
 
+/**
+ * Update one word of data in the eeprom, target system specific function.
+ *
+ * @param storageModule Pointer to storage module.
+ * @param data Data word to be written
+ * @param eepromAddr Address in eeprom, from where data will be updated.
+ *
+ * @return true if write was successful or false, if still waiting previous data to finish writing.
+ */
+bool_t CO_eeprom_updateWord(void *storageModule, uint16_t data, size_t eepromAddr);
+
 /** @} */ /* CO_storage_eeprom */
 
 #ifdef __cplusplus
