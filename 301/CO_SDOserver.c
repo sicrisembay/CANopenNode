@@ -474,7 +474,21 @@ validateAndWriteToOD(CO_SDOserver_t* SDO, CO_SDO_abortCode_t* abortCode, uint8_t
     OD_size_t countWritten = 0;
 
     CO_LOCK_OD(SDO->CANdevTx);
+#if (C2000_PORT != 0)
+    ODR_t odRet;
+    if (SDO->OD_IO.write == OD_writeOriginal) {
+        uint16_t tmpBuf[CO_CONFIG_SDO_SRV_BUFFER_SIZE/2];
+        for(uint16_t i = 0; i < sizeof(tmpBuf); i++) {
+            tmpBuf[i] = SDO->buf[i*2] & 0x00FF;
+            tmpBuf[i] |= (SDO->buf[(i*2) + 1] << 8);
+        }
+        odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, tmpBuf, SDO->bufOffsetWr, &countWritten);
+    } else {
+        odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, SDO->buf, SDO->bufOffsetWr, &countWritten);
+    }
+#else
     ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, SDO->buf, SDO->bufOffsetWr, &countWritten);
+#endif
     CO_UNLOCK_OD(SDO->CANdevTx);
 
     SDO->bufOffsetWr = 0;
