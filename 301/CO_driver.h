@@ -644,6 +644,23 @@ CO_getUint32(const void* buf) {
 #endif
 }
 
+/** Get uint64_t value from memory buffer */
+static inline uint64_t
+CO_getUint64(const void * buf) {
+#if (C2000_PORT != 0)
+    uint64_t value = 0;
+    uint8_t * pBuf8 = (uint8_t *)buf;
+    for(int i = 0; i < 8; i++) {
+        value += ((uint64_t)(pBuf8[i])) << (8 * i);
+    }
+    return value;
+#else
+    uint64_t value;
+    (void)memmove((void*)&value, buf, sizeof(value));
+    return value;
+#endif
+}
+
 /** Get float value from memory buffer */
 static inline float
 CO_getReal32(const void* buf) {

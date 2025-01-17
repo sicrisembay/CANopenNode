@@ -848,6 +848,8 @@ CO_RPDO_process(CO_RPDO_t* RPDO,
                         *((uint16_t *)pBufTemp) = CO_getUint16(dataOD);
                     } else if(ODdataLength == 4) {
                         *((uint32_t *)pBufTemp) = CO_getUint32(dataOD);
+                    } else if(ODdataLength == 8) {
+                        *((uint64_t *)pBufTemp) = CO_getUint64(dataOD);
                     } else {
                         /// TODO
                     }
