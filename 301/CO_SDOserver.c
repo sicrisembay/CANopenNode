@@ -780,9 +780,11 @@ CO_SDOserver_process(CO_SDOserver_t* SDO, bool_t NMTisPreOrOperational, uint32_t
 
                         CO_LOCK_OD(SDO->CANdevTx);
 #if (C2000_PORT != 0)
-                        uint8_t bufTemp[6];
-                        void * pbufTemp = (void *)bufTemp;
-                        memcpy(bufTemp, buf, sizeof(buf));
+                        union {
+                            uint64_t tmp64;
+                            uint8_t tmpBuf[6];
+                        } bufTemp;              // this local variable is always even-aligned
+                        void * pbufTemp = (void *)&bufTemp;
                         if(SDO->OD_IO.write == OD_writeOriginal) {
                             if(dataSizeToWrite == 1) {
                                 *((uint8_t *)pbufTemp) = CO_getUint8(buf);
@@ -790,9 +792,11 @@ CO_SDOserver_process(CO_SDOserver_t* SDO, bool_t NMTisPreOrOperational, uint32_t
                                 *((uint16_t *)pbufTemp) = CO_getUint16(buf);
                             } else if(dataSizeToWrite == 4) {
                                 *((uint32_t *)pbufTemp) = CO_getUint32(buf);
+                            } else if(dataSizeToWrite == 8) {
+                                *((uint64_t *)pbufTemp) = CO_getUint64(buf);
                             }
                         }
-                        ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, bufTemp, dataSizeToWrite, &countWritten);
+                        ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, &bufTemp, dataSizeToWrite, &countWritten);
 #else
                         ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, buf, dataSizeToWrite, &countWritten);
 #endif
