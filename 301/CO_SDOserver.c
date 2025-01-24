@@ -795,6 +795,8 @@ CO_SDOserver_process(CO_SDOserver_t* SDO, bool_t NMTisPreOrOperational, uint32_t
                             } else if(dataSizeToWrite == 8) {
                                 *((uint64_t *)pbufTemp) = CO_getUint64(buf);
                             }
+                        } else {
+                            memcpy(pbufTemp, buf, sizeof(buf));
                         }
                         ODR_t odRet = SDO->OD_IO.write(&SDO->OD_IO.stream, &bufTemp, dataSizeToWrite, &countWritten);
 #else
