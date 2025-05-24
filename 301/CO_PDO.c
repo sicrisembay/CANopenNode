@@ -841,20 +841,24 @@ CO_RPDO_process(CO_RPDO_t* RPDO,
 #if (C2000_PORT != 0)
                 uint8_t bufTemp[CO_PDO_MAX_SIZE];
                 void * pBufTemp = (void *)bufTemp;
-                if((OD_IO->stream.attribute & ODA_STR) == 0) {
-                    if(ODdataLength == 1) {
-                        *((uint8_t *)pBufTemp) = CO_getUint8(dataOD);
-                    } else if(ODdataLength == 2) {
-                        *((uint16_t *)pBufTemp) = CO_getUint16(dataOD);
-                    } else if(ODdataLength == 4) {
-                        *((uint32_t *)pBufTemp) = CO_getUint32(dataOD);
-                    } else if(ODdataLength == 8) {
-                        *((uint64_t *)pBufTemp) = CO_getUint64(dataOD);
+                if(OD_IO->write == OD_writeOriginal) {
+                    if((OD_IO->stream.attribute & ODA_STR) == 0) {
+                        if(ODdataLength == 1) {
+                            *((uint8_t *)pBufTemp) = CO_getUint8(dataOD);
+                        } else if(ODdataLength == 2) {
+                            *((uint16_t *)pBufTemp) = CO_getUint16(dataOD);
+                        } else if(ODdataLength == 4) {
+                            *((uint32_t *)pBufTemp) = CO_getUint32(dataOD);
+                        } else if(ODdataLength == 8) {
+                            *((uint64_t *)pBufTemp) = CO_getUint64(dataOD);
+                        } else {
+                            /// TODO
+                        }
                     } else {
-                        /// TODO
+                        /// TODO: handle string
                     }
                 } else {
-                    /// TODO: handle string
+                    pBufTemp = (void *)dataOD;
                 }
                 OD_IO->write(&OD_IO->stream, pBufTemp, ODdataLength, &countWritten);
 #else
